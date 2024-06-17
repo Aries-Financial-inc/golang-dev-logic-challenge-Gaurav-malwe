@@ -80,7 +80,9 @@ func listErrors(err error) string {
 }
 
 func checkError(ginCtx *gin.Context, err error) bool {
+	log := log.GetLogger(ginCtx.Request.Context())
 	if err != nil {
+		log.WithContext(ginCtx.Request.Context()).Error(err)
 		writeErrorOnResponse(ginCtx.Writer, utils.CustomErrorFields(utils.RR1001, err.Error()))
 		return true
 	}

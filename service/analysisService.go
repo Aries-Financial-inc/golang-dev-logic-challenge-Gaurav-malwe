@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/constants"
+	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/log"
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/model"
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/utils"
 )
@@ -22,6 +23,10 @@ type IAnalysisService interface {
 // Returns:
 // - model.AnalysisResult: a structure containing the risk and reward graph, maximum profit, maximum loss, and break-even points.
 func (s *service) AnalysisLogic(ctx context.Context, contracts []model.OptionsContract) model.AnalysisResult {
+
+	log := log.GetLogger(ctx)
+	log.Info("Service::AnalysisLogic")
+
 	graph := calculateXYValues(ctx, contracts)
 
 	maxProfit := calculateMaxProfit(ctx, graph)
@@ -45,6 +50,8 @@ func (s *service) AnalysisLogic(ctx context.Context, contracts []model.OptionsCo
 // Returns:
 // - graph: a slice of model.GraphPoint representing the X and Y values for the graph.
 func calculateXYValues(ctx context.Context, contracts []model.OptionsContract) []model.GraphPoint {
+	log := log.GetLogger(ctx)
+	log.Info("Service::AnalysisLogic::calculateXYValues")
 
 	var graph []model.GraphPoint
 	minPrice := utils.GetEnvOrDefaultFloat64("MIN_PRICE", 0.0)
@@ -55,7 +62,7 @@ func calculateXYValues(ctx context.Context, contracts []model.OptionsContract) [
 		totalPL := 0.0
 
 		for _, contract := range contracts {
-			pl := calculatePL(underlying, contract)
+			pl := calculatePL(ctx, underlying, contract)
 			totalPL += pl
 		}
 
@@ -73,7 +80,10 @@ func calculateXYValues(ctx context.Context, contracts []model.OptionsContract) [
 //
 // Returns:
 // - pl: the profit or loss for the options contract.
-func calculatePL(underlying float64, contract model.OptionsContract) float64 {
+func calculatePL(ctx context.Context, underlying float64, contract model.OptionsContract) float64 {
+	log := log.GetLogger(ctx)
+	log.Info("Service::AnalysisLogic::calculatePL")
+
 	var pl float64
 	switch contract.Type {
 	case constants.Call:
@@ -101,6 +111,9 @@ func calculatePL(underlying float64, contract model.OptionsContract) float64 {
 // Returns:
 // - maxProfit: the maximum profit value from the graph.
 func calculateMaxProfit(ctx context.Context, graph []model.GraphPoint) float64 {
+	log := log.GetLogger(ctx)
+	log.Info("Service::AnalysisLogic::calculateMaxProfit")
+
 	maxProfit := graph[0].Y
 	for _, point := range graph {
 		if point.Y > maxProfit {
@@ -119,6 +132,9 @@ func calculateMaxProfit(ctx context.Context, graph []model.GraphPoint) float64 {
 // Returns:
 // - maxLoss: the maximum loss value from the graph.
 func calculateMaxLoss(ctx context.Context, graph []model.GraphPoint) float64 {
+	log := log.GetLogger(ctx)
+	log.Info("Service::AnalysisLogic::calculateMaxLoss")
+
 	maxLoss := graph[0].Y
 	for _, point := range graph {
 		if point.Y < maxLoss {
@@ -137,6 +153,9 @@ func calculateMaxLoss(ctx context.Context, graph []model.GraphPoint) float64 {
 // Returns:
 // - breakEvenPoints: a slice of float64 representing the break-even points.
 func calculateBreakEvenPoints(ctx context.Context, graph []model.GraphPoint) []float64 {
+	log := log.GetLogger(ctx)
+	log.Info("Service::AnalysisLogic::calculateBreakEvenPoints")
+
 	var breakEvenPoints []float64
 	for i := 1; i < len(graph); i++ {
 		if graph[i-1].Y*graph[i].Y <= 0 {
