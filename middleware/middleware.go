@@ -14,6 +14,11 @@ type LogRecord struct {
 	status int
 }
 
+// TransactionInMiddleware is a middleware function that generates a correlation ID for each incoming request.
+//
+// It takes a gin.Context object as a parameter and returns a gin.HandlerFunc.
+// The gin.HandlerFunc is responsible for generating a correlation ID using the GenerateCorrelationId function
+// and then calling the next handler in the chain using the c.Next() method.
 func TransactionInMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		GenerateCorrelationId()
@@ -21,6 +26,7 @@ func TransactionInMiddleware() gin.HandlerFunc {
 	}
 }
 
+// GenerateCorrelationId generates a new UUID and assigns it to the CorrelationId field in the constants package.
 func GenerateCorrelationId() {
 	constants.CorrelationId = uuid.New().String()
 }

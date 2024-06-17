@@ -26,6 +26,12 @@ func SetLevel(level logrus.Level) {
 	logger.Level = level
 }
 
+// SetLogLevel sets the log level for the logger based on the given string.
+//
+// level: a string representing the log level to be set. Valid values are
+//
+//	"debug", "info", "error", and "warn". If an invalid value is
+//	provided, the default log level is set to "info".
 func SetLogLevel(level string) {
 	switch level {
 	case logrus.DebugLevel.String():
@@ -42,6 +48,10 @@ func SetLogLevel(level string) {
 
 }
 
+// SetFormatter sets the formatter for the logger based on the provided format.
+//
+// Parameters:
+// - format: a string representing the format to set the formatter to. Valid values are "text" and any other value.
 func SetFormatter(format string) {
 	if format == "text" {
 		logger.SetFormatter(&logrus.TextFormatter{
@@ -64,7 +74,6 @@ func SetFormatter(format string) {
 }
 
 // Debug logs a message at level Debug on the standard logger.
-
 func Debug(args ...interface{}) {
 	if logger.Level >= logrus.DebugLevel {
 		entry := logger.WithFields(logrus.Fields{})
@@ -74,7 +83,6 @@ func Debug(args ...interface{}) {
 }
 
 // Debug logs a message with fields at level Debug on the standard logger.
-
 func DebugWithFields(l interface{}, f Fields) {
 	if logger.Level >= logrus.DebugLevel {
 		entry := logger.WithFields(logrus.Fields(f))
@@ -83,7 +91,6 @@ func DebugWithFields(l interface{}, f Fields) {
 }
 
 // Info logs a message at level Info on the standard logger.
-
 func Info(args ...interface{}) {
 	if logger.Level >= logrus.InfoLevel {
 		entry := logger.WithFields(logrus.Fields{})
@@ -93,7 +100,6 @@ func Info(args ...interface{}) {
 }
 
 // Debug logs a message with fields at level Debug on the standard logger.
-
 func InfoWithFields(l interface{}, f Fields) {
 	if logger.Level >= logrus.InfoLevel {
 		entry := logger.WithFields(logrus.Fields(f))

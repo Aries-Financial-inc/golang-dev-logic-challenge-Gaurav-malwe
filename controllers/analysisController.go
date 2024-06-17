@@ -19,6 +19,10 @@ type IAnalysisController interface {
 	AnalysisHandler(ginCtx *gin.Context)
 }
 
+// AnalysisHandler handles the analysis for options contracts.
+//
+// ginCtx: *gin.Context for handling HTTP request and response.
+// No return value.
 func (c *controller) AnalysisHandler(ginCtx *gin.Context) {
 	span, ctx := opentracing.StartSpanFromContext(ginCtx.Request.Context(), "IAnalysisController::AnalysisHandler")
 	defer span.Finish()
@@ -37,6 +41,14 @@ func (c *controller) AnalysisHandler(ginCtx *gin.Context) {
 
 }
 
+// validateModelRequest validates the request payload and returns the validated options contracts and any error encountered.
+//
+// Parameters:
+// - ginCtx: a pointer to a gin.Context object representing the request context.
+//
+// Returns:
+// - []model.OptionsContract: an array of validated options contracts.
+// - error: an error object if validation fails, otherwise nil.
 func validateModelRequest(ginCtx *gin.Context) ([]model.OptionsContract, error) {
 	var payload []model.OptionsContract
 	var err error
