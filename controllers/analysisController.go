@@ -1,48 +1,71 @@
 package controllers
 
 import (
-	"net/http"
+	"fmt"
+	"strings"
+
+	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/log"
+	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/model"
+	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/utils"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/opentracing/opentracing-go"
 )
 
-// OptionsContract represents the data structure of an options contract
-type OptionsContract struct {
-	// Your code here
+type IAnalysisController interface {
+	AnalysisHandler(ginCtx *gin.Context)
 }
 
-// AnalysisResponse represents the data structure of the analysis result
-type AnalysisResponse struct {
-	XYValues        []XYValue `json:"xy_values"`
-	MaxProfit       float64   `json:"max_profit"`
-	MaxLoss         float64   `json:"max_loss"`
-	BreakEvenPoints []float64 `json:"break_even_points"`
+func (c *controller) AnalysisHandler(ginCtx *gin.Context) {
+	span, ctx := opentracing.StartSpanFromContext(ginCtx.Request.Context(), "IAnalysisController::AnalysisHandler")
+	defer span.Finish()
+
+	log := log.GetLogger(ctx)
+	log.Info("Controller::Customer::UploadCustomerFromCSV")
+
+	payload, err := validateModelRequest(ginCtx)
+	if checkError(ginCtx, err) {
+		return
+	}
+
+	// func(c *gin.Context) {
+	// 	var contracts []model.OptionsContract
+
+	// 	if err := c.ShouldBindJSON(&contracts); err != nil {
+	// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		return
+	// 	}
+
+	// 	// Your code here
+
+	// 	c.JSON(http.StatusOK, gin.H{"message": "Your code here"})
+	// }
 }
 
-// XYValue represents a pair of X and Y values
-type XYValue struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
+func validateModelRequest(ginCtx *gin.Context) ([]model.OptionsContract, error) {
+	var payload []model.OptionsContract
+	var err error
+
+	// check binding
+	if err := ginCtx.ShouldBind(&payload); err != nil {
+		return payload, err
+	}
+
+	validate := validator.New()
+
+	err = validate.Struct(payload)
+	if err != nil {
+		arr := listErrors(err)
+		return payload, fmt.Errorf("%#v", utils.CustomErrorFields(utils.RR1001, ("Invalid/missing input parameters: "+arr)))
+	}
+	return payload, nil
 }
 
-func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
-	// Your code here
-}
-
-func calculateXYValues(contracts []OptionsContract) []XYValue {
-	// Your code here
-	return nil
-}
-
-func calculateMaxProfit(contracts []OptionsContract) float64 {
-	// Your code here
-	return 0
-}
-
-func calculateMaxLoss(contracts []OptionsContract) float64 {
-	// Your code here
-	return 0
-}
-
-func calculateBreakEvenPoints(contracts []OptionsContract) []float64 {
-	// Your code here
-	return nil
+func listErrors(err error) string {
+	var arr []string
+	for _, err := range err.(validator.ValidationErrors) {
+		arr = append(arr, err.Field())
+	}
+	str := strings.Join(arr, ", ")
+	return str
 }
