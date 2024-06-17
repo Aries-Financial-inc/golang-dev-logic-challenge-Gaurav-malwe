@@ -4,6 +4,12 @@ package constants
 const (
 	GoProfile_Local = "local" // Local development
 	VERSION         = "1.0.0" // Version of the application
+
+	Call = "Call"
+	Put  = "Put"
+
+	Long  = "long"
+	Short = "short"
 )
 
 var (

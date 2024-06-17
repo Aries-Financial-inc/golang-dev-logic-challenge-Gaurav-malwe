@@ -47,10 +47,13 @@ func validateModelRequest(ginCtx *gin.Context) ([]model.OptionsContract, error) 
 
 	validate := validator.New()
 
-	err = validate.Struct(payload)
-	if err != nil {
-		arr := listErrors(err)
-		return payload, fmt.Errorf("%#v", utils.CustomErrorFields(utils.RR1001, ("Invalid/missing input parameters: "+arr)))
+	for _, contract := range payload {
+		// check validation
+		err = validate.Struct(contract)
+		if err != nil {
+			arr := listErrors(err)
+			return payload, fmt.Errorf("%#v", utils.CustomErrorFields(utils.RR1001, ("Invalid/missing input parameters: "+arr)))
+		}
 	}
 	return payload, nil
 }
