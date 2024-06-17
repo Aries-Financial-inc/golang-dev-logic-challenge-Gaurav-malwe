@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/mocks"
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/model"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -54,9 +56,11 @@ func TestAnalysisHandler(t *testing.T) {
 
 	tests := []test{
 		{
-			name:     "Success",
-			payload:  validPayload,
-			mockCall: mockService.On("AnalysisLogic", validPayload).Return(model.AnalysisResult{}),
+			name:    "Success",
+			payload: validPayload,
+			mockCall: mockService.On("AnalysisLogic", mock.Anything, validPayload).
+				Return(model.AnalysisResult{}).
+				Once(),
 			checkExpected: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				assert.Equal(t, http.StatusOK, recorder.Code)
 			},
@@ -82,12 +86,16 @@ func TestAnalysisHandler(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(recorder)
 
+			span, ctx := opentracing.StartSpanFromContext(context.Background(), "test")
+			defer span.Finish()
+
 			jsonValue, _ := json.Marshal(tt.payload)
 			c.Request = &http.Request{
 				Method: "POST",
 				Header: make(http.Header),
 				Body:   io.NopCloser(bytes.NewBuffer(jsonValue)),
 			}
+			c.Request = c.Request.WithContext(ctx)
 
 			ctrl.AnalysisHandler(c)
 

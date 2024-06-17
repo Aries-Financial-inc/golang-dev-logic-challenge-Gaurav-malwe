@@ -53,7 +53,7 @@ func validateModelRequest(ginCtx *gin.Context) ([]model.OptionsContract, error) 
 	var payload []model.OptionsContract
 	var err error
 	// check binding
-	if err := ginCtx.ShouldBind(&payload); err != nil {
+	if err := ginCtx.ShouldBindJSON(&payload); err != nil {
 		return payload, err
 	}
 

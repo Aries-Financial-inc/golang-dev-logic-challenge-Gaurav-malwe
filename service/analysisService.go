@@ -81,8 +81,6 @@ func calculateXYValues(ctx context.Context, contracts []model.OptionsContract) [
 // Returns:
 // - pl: the profit or loss for the options contract.
 func calculatePL(ctx context.Context, underlying float64, contract model.OptionsContract) float64 {
-	log := log.GetLogger(ctx)
-	log.Info("Service::AnalysisLogic::calculatePL")
 
 	var pl float64
 	switch contract.Type {

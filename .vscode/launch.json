@@ -10,7 +10,7 @@
             "program": "/Users/gauravmalwe/work/golang-dev-logic-challenge-Gaurav-malwe/main.go", // Path to your main.go    
             "env": {
                 "MIN_PRICE": "0.0",
-                "MAX_PRICE": "201.0",
+                "MAX_PRICE": "200.0",
                 "STEP": "1.0",
             },
         }
