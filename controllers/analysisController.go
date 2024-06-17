@@ -28,7 +28,7 @@ func (c *controller) AnalysisHandler(ginCtx *gin.Context) {
 	defer span.Finish()
 
 	log := log.GetLogger(ctx)
-	log.Info("Controller::Customer::UploadCustomerFromCSV")
+	log.Info("Controller::AnalysisHandler")
 
 	payload, err := validateModelRequest(ginCtx)
 	if checkError(ginCtx, err) {
