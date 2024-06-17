@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
+	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/constants"
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/log"
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/model"
 	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-gaurav-malwe/utils"
@@ -28,24 +31,15 @@ func (c *controller) AnalysisHandler(ginCtx *gin.Context) {
 		return
 	}
 
-	// func(c *gin.Context) {
-	// 	var contracts []model.OptionsContract
+	riskRewardResult := c.s.AnalysisLogic(ctx, payload)
 
-	// 	if err := c.ShouldBindJSON(&contracts); err != nil {
-	// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 		return
-	// 	}
+	ginCtx.JSON(http.StatusOK, riskRewardResult)
 
-	// 	// Your code here
-
-	// 	c.JSON(http.StatusOK, gin.H{"message": "Your code here"})
-	// }
 }
 
 func validateModelRequest(ginCtx *gin.Context) ([]model.OptionsContract, error) {
 	var payload []model.OptionsContract
 	var err error
-
 	// check binding
 	if err := ginCtx.ShouldBind(&payload); err != nil {
 		return payload, err
@@ -68,4 +62,33 @@ func listErrors(err error) string {
 	}
 	str := strings.Join(arr, ", ")
 	return str
+}
+
+func checkError(ginCtx *gin.Context, err error) bool {
+	if err != nil {
+		writeErrorOnResponse(ginCtx.Writer, utils.CustomErrorFields(utils.RR1001, err.Error()))
+		return true
+	}
+	return false
+}
+
+func writeErrorOnResponse(responseWriter http.ResponseWriter, fields map[string]interface{}) {
+	httpStatus, _ := fields["HTTP_STATUS"].(int)
+	additionalMessage, _ := fields["ADDITIONAL_MESSAGE"].(string)
+
+	response := model.StandardError{
+		Version:        constants.VERSION,
+		HttpStatusCode: httpStatus,
+		Errors: []model.APIErrorResponse{
+			{
+				Code:              fields["CODE"].(string),
+				Message:           fields["ERR_MESSAGE"].(string),
+				AdditionalMessage: additionalMessage,
+			},
+		},
+	}
+
+	responseWriter.Header().Add("Content-Type", "application/json")
+	responseWriter.WriteHeader(httpStatus)
+	json.NewEncoder(responseWriter).Encode(response)
 }
